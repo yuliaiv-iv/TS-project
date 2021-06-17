@@ -1,28 +1,28 @@
-// Project Type
+// Task Type
 
-enum ProjectStatus {
+enum TaskStatus {
   Active,
-  Finished,
+  Completed,
 }
 
-class Project {
+class Task {
   constructor(
     public id: string,
     public title: string,
     public description: string,
-    public people: number,
-    public status: ProjectStatus
+    public days: number,
+    public status: TaskStatus
   ) {}
 }
 
-// Project State
+// Task State
 
-type Listener = (item: Project[]) => void;
+type Listener = (item: Task[]) => void;
 
-class ProjectState {
+class TaskState {
   listeners: Listener[] = [];
-  projects: Project[] = [];
-  static instance: ProjectState;
+  tasks: Task[] = [];
+  static instance: TaskState;
 
   constructor() {}
 
@@ -30,7 +30,7 @@ class ProjectState {
     if (this.instance) {
       return this.instance;
     }
-    this.instance = new ProjectState();
+    this.instance = new TaskState();
     return this.instance;
   }
 
@@ -38,38 +38,37 @@ class ProjectState {
     this.listeners.push(listenerFn);
   }
 
-  addProject(title: string, description: string, numOfPeople: number) {
-    const newProject = new Project(
+  addTask(title: string, description: string, numOfDays: number) {
+    const newTask = new Task(
       Date.now().toString(),
       title,
       description,
-      numOfPeople,
-      ProjectStatus.Active
+      numOfDays,
+      TaskStatus.Active
     );
 
-    this.projects.push(newProject);
+    this.tasks.push(newTask);
     this._updateListeners();
   }
 
-  switchProjectStatus(projectId: string, newStatus: ProjectStatus) {
-    const project = this.projects.find((p) => p.id === projectId);
-    if (project && project.status !== newStatus) {
-      project.status = newStatus;
+  switchTaskStatus(taskId: string, newStatus: TaskStatus) {
+    const task = this.tasks.find((t) => t.id === taskId);
+    if (task && task.status !== newStatus) {
+      task.status = newStatus;
       this._updateListeners();
     }
   }
 
   _updateListeners() {
     for (const listenerFn of this.listeners) {
-      listenerFn(this.projects.slice());
+      listenerFn(this.tasks.slice());
     }
   }
 }
 
-const projectState = ProjectState.getInstance();
+const taskState = TaskState.getInstance();
 
 // Drag and Drop Interfaces
-
 interface Drag {
   dragStartHandler(e: DragEvent): void;
   dragEndHandler(e: DragEvent): void;
@@ -146,32 +145,32 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
   abstract render(): void;
 }
 
-// Project Item Class
+// Task Item Class
 
-class ProjectItem
+class TaskItem
   extends Component<HTMLUListElement, HTMLLIElement>
   implements Drag
 {
-  project: Project;
+  task: Task;
 
-  get persons() {
-    if (this.project.people === 1) {
-      return "1 person";
+  get days() {
+    if (this.task.days === 1) {
+      return "1 day";
     } else {
-      return `${this.project.people} persons`;
+      return `${this.task.days} days`;
     }
   }
 
-  constructor(hostId: string, project: Project) {
-    super("single-project", hostId, false, project.id);
-    this.project = project;
+  constructor(hostId: string, task: Task) {
+    super("single-task", hostId, false, task.id);
+    this.task = task;
 
     this.configure();
     this.render();
   }
 
   dragStartHandler(e: DragEvent) {
-    e.dataTransfer!.setData("text/plain", this.project.id);
+    e.dataTransfer!.setData("text/plain", this.task.id);
     e.dataTransfer!.effectAllowed = "move";
   }
   dragEndHandler(_: DragEvent) {}
@@ -184,22 +183,22 @@ class ProjectItem
     this.element.addEventListener("dragend", this.dragEndHandler.bind(this));
   }
   render() {
-    this.element.querySelector("h2")!.textContent = this.project.title;
-    this.element.querySelector("h3")!.textContent = this.persons + " assigned";
-    this.element.querySelector("p")!.textContent = this.project.description;
+    this.element.querySelector("h2")!.textContent = this.task.title;
+    this.element.querySelector("h3")!.textContent = this.days + " to complete the task";
+    this.element.querySelector("p")!.textContent = this.task.description;
   }
 }
 
-// Project List Class
-class ProjectList
+// Task List Class
+class TaskList
   extends Component<HTMLDivElement, HTMLElement>
   implements DragTarget
 {
-  assignedProjects: Project[];
+  assignedTasks: Task[];
 
   constructor(private type: "active" | "finished") {
-    super("project-list", "app", false, `${type}-projects`);
-    this.assignedProjects = [];
+    super("task-list", "main", false, `${type}-tasks`);
+    this.assignedTasks = [];
 
     this.configure();
     this.render();
@@ -214,10 +213,10 @@ class ProjectList
   }
 
   dropHandler(e: DragEvent) {
-    const projectId = e.dataTransfer!.getData("text/plain");
-    projectState.switchProjectStatus(
-      projectId,
-      this.type === "active" ? ProjectStatus.Active : ProjectStatus.Finished
+    const taskId = e.dataTransfer!.getData("text/plain");
+    taskState.switchTaskStatus(
+      taskId,
+      this.type === "active" ? TaskStatus.Active : TaskStatus.Completed
     );
   }
 
@@ -234,42 +233,42 @@ class ProjectList
       this.dragLeaveHandler.bind(this)
     );
 
-    projectState.addListener((projects: Project[]) => {
-      const relevantProject = projects.filter((p) => {
+    taskState.addListener((tasks: Task[]) => {
+      const relevantTask = tasks.filter((t) => {
         if (this.type === "active") {
-          return p.status === ProjectStatus.Active;
+          return t.status === TaskStatus.Active;
         }
-        return p.status === ProjectStatus.Finished;
+        return t.status === TaskStatus.Completed;
       });
-      this.assignedProjects = relevantProject;
-      this._renderProjects();
+      this.assignedTasks = relevantTask;
+      this._renderTasks();
     });
   }
 
   render() {
-    const listId = `${this.type}-projects-list`;
+    const listId = `${this.type}-tasks-list`;
     this.element.querySelector("ul")!.id = listId;
     this.element.querySelector("h2")!.textContent =
-      this.type[0].toUpperCase() + this.type.slice(1) + " Projects";
+      this.type[0].toUpperCase() + this.type.slice(1) + " Tasks";
   }
 
-  _renderProjects() {
+  _renderTasks() {
     const listElement = <HTMLUListElement>(
-      document.getElementById(`${this.type}-projects-list`)!
+      document.getElementById(`${this.type}-tasks-list`)!
     );
     listElement.innerHTML = "";
-    for (const projectItem of this.assignedProjects) {
-      new ProjectItem(this.element.querySelector("ul")!.id, projectItem);
+    for (const taskItem of this.assignedTasks) {
+      new TaskItem(this.element.querySelector("ul")!.id, taskItem);
     }
   }
 }
 
-// Project Input Class
+// Task Input Class
 
-class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
+class TaskInput extends Component<HTMLDivElement, HTMLFormElement> {
   titleInput: HTMLInputElement;
   discriptionInput: HTMLInputElement;
-  peopleInput: HTMLInputElement;
+  taskInput: HTMLInputElement;
 
   constructor() {
     super("form", "app", true, "user-input");
@@ -277,7 +276,7 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
     this.discriptionInput = <HTMLInputElement>(
       this.element.querySelector("#description")
     );
-    this.peopleInput = <HTMLInputElement>this.element.querySelector("#people");
+    this.taskInput = <HTMLInputElement>this.element.querySelector("#days");
 
     this.configure();
   }
@@ -291,7 +290,7 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
   _getUserInput(): [string, string, number] | void {
     const enteredTitle = this.titleInput.value;
     const enteredDiscription = this.discriptionInput.value;
-    const enteredPeople = this.peopleInput.value;
+    const enteredTask = this.taskInput.value;
 
     const titleValid: Valid = {
       value: enteredTitle,
@@ -303,8 +302,8 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
       minLength: 5,
       maxLength: 500,
     };
-    const peopleValid: Valid = {
-      value: +enteredPeople,
+    const taskValid: Valid = {
+      value: +enteredTask,
       required: true,
       min: 1,
       max: 10,
@@ -313,32 +312,32 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
     if (
       !validation(titleValid) ||
       !validation(discriptionValid) ||
-      !validation(peopleValid)
+      !validation(taskValid)
     ) {
       alert("Invalid input, try again");
       return;
     } else {
-      return [enteredTitle, enteredDiscription, +enteredPeople];
+      return [enteredTitle, enteredDiscription, +enteredTask];
     }
   }
 
   _clearForm() {
     this.titleInput.value = "";
     this.discriptionInput.value = "";
-    this.peopleInput.value = "";
+    this.taskInput.value = "";
   }
 
   _submitHandler(e: Event) {
     e.preventDefault();
     const userInput = this._getUserInput();
     if (Array.isArray(userInput)) {
-      const [title, discription, people] = userInput;
-      projectState.addProject(title, discription, people);
+      const [title, discription, days] = userInput;
+      taskState.addTask(title, discription, days);
       this._clearForm();
     }
   }
 }
 
-const input = new ProjectInput();
-const activeList = new ProjectList("active");
-const finishedList = new ProjectList("finished");
+const input = new TaskInput();
+const activeList = new TaskList("active");
+const finishedList = new TaskList("finished");

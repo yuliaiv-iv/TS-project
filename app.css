@@ -38,8 +38,9 @@ textarea:focus {
 
 button {
   font: inherit;
-  background: #ff0062;
-  border: 1px solid #ff0062;
+  background: #347EFF;
+  border: 1px solid #347EFF;
+  border-radius: 8px;
   cursor: pointer;
   color: white;
   padding: 0.75rem 1rem;
@@ -51,78 +52,96 @@ button:focus {
 
 button:hover,
 button:active {
-  background: #a80041;
-  border-color: #a80041;
+  background: #2A65CC;
+  border-color: #2A65CC;
 }
 
-.projects {
+#main {
+  display: flex;
+}
+
+.tasks {
   margin: 1rem;
-  border: 1px solid #ff0062;
+  border: 1px solid #347EFF;
+  border-radius: 15px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-.projects header {
-  background: #ff0062;
+.tasks header {
+  background: #347EFF;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
   height: 3.5rem;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-#finished-projects {
-  border-color: #0044ff;
+#finished-tasks {
+  border-color: #1da863;
 }
 
-#finished-projects header {
-  background: #0044ff;
+#finished-tasks header {
+  background: #1da863;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
 }
 
-.projects h2 {
+.tasks h2 {
   margin: 0;
   color: white;
 }
 
-.projects ul {
+.tasks ul {
   list-style: none;
   margin: 0;
-  padding: 1rem;
+  padding: 3rem 1rem;
 }
 
-.projects li {
+.tasks li {
   box-shadow: 1px 1px 8px rgba(0, 0, 0, 0.26);
   padding: 1rem;
   margin: 1rem;
   background: #fff;
 }
 
-.projects li h2 {
-  color: #ff0062;
+.tasks li h2 {
+  color: #2A65CC;
   margin: 0.5rem 0;
 }
 
-#finished-projects li h2 {
-  color: #0044ff;
+#finished-tasks li h2 {
+  color: #1da863;
 }
 
-.projects li h3 {
+.tasks li h3 {
   color: #575757;
   font-size: 1rem;
 }
 
-.project li p {
+.task li p {
   margin: 0;
 }
 
 .droppable {
-  background: #ffe3ee;
+  background: #bcdafd;
+  border-bottom-right-radius: 15px;
+  border-bottom-left-radius: 15px;
 }
 
-#finished-projects .droppable {
-  background: #d6e1ff;
+#finished-tasks .droppable {
+  background: #dbfde9;
+  border-bottom-right-radius: 15px;
+  border-bottom-left-radius: 15px;
 }
 
 #user-input {
   margin: 1rem;
   padding: 1rem;
-  border: 1px solid #ff0062;
+  border: 1px solid #347EFF;
   background: #f7f7f7;
+  border-radius: 15px;
 }
