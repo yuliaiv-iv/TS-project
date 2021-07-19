@@ -1,19 +1,22 @@
 {
-  "name": "understanding-typescript",
+  "name": "tsproject",
   "version": "1.0.0",
-  "description": "Understanding TypeScript Course Setup",
+  "description": "tsproject",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "lite-server"
+    "start": "lite-server",
+    "build": "rm -rf dist",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "keywords": [
-    "typescript",
-    "course"
+    "typescript"
   ],
-  "author": "Maximilian Schwarzmüller",
+  "author": "",
   "license": "ISC",
   "devDependencies": {
+    "gh-pages": "^3.2.3",
     "lite-server": "^2.5.4"
   }
 }
